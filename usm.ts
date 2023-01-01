@@ -89,8 +89,8 @@ class CRID {
         }
     }
 
-    parseString(data: ArrayBuffer, len: number) {
-        const fp = new DataView(data, 0, len);
+    parseString(data: ArrayBuffer, byteOffset: number, len: number) {
+        const fp = new DataView(data, byteOffset, len);
         const sign = fp.getUint32(0, true);
         const size = fp.getUint32(4);
         const valueOffset = fp.getUint32(8);
@@ -132,11 +132,10 @@ class CRID {
             let p:Uint8Array;
             switch (magic) {
                 case 0x44495243: // CRID
-                    this.parseString(data.slice(ftell + off + 8), len - off - pad);
+                    this.parseString(data, ftell + off + 8, len - off - pad);
                     break;
                 case 0x56465340: // @SFV
                     if (type) break;
-                    data.slice(ftell + off + 8, )
                     p = new Uint8Array(data, ftell + off + 8, len - off - pad);
                     v_size += p.byteLength;
                     v_trunks.push(this.maskVideo(p))
@@ -154,7 +153,7 @@ class CRID {
         return { v_trunks, v_size, a_trunks, a_size }
     }
     demux(data: ArrayBuffer) {
-        let result = this.parseTrunk(data)
+        let result = this.parseTrunk(data);
         this.video = new Uint8Array(result.v_size);
         this.audio = new Uint8Array(result.a_size);
         this.concat(result.v_trunks, this.video);
