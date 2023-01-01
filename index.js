@@ -54,6 +54,7 @@ function decode(usm) {
                     tick();
                     crid = new CRID();
                     worker = FFmpeg.createFFmpeg({
+                        // single-threaded version
                         mainName: 'main',
                         corePath: new URL("ffmpeg-core.js", document.baseURI).href,
                         log: true
@@ -63,9 +64,7 @@ function decode(usm) {
                     _a.sent();
                     tock("load ffmpeg");
                     tick();
-                    return [4 /*yield*/, crid.demuxAsync(usm)];
-                case 2:
-                    demuxed = _a.sent();
+                    demuxed = crid.demux(usm.slice(0));
                     tock("demux");
                     tick();
                     worker.FS('writeFile', '/v.ivf', demuxed.video);
@@ -73,7 +72,7 @@ function decode(usm) {
                     tock("writeFile to MEMFS");
                     tick();
                     return [4 /*yield*/, worker.run('-i', '/v.ivf', '-i', '/a.adx', '-c:v', 'copy', '/o.mp4')];
-                case 3:
+                case 2:
                     _a.sent();
                     tock("run ffmpeg");
                     tick();
