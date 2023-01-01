@@ -4,12 +4,11 @@
   "description": "js/ts port of usm demuxer",
   "main": "index.js",
   "dependencies": {
-    "typescript": "^3.9.6",
-    "@types/node": "^14.0.22"
+    "@types/node": "^14.0.22",
+    "typescript": "^3.9.6"
   },
   "devDependencies": {
-    "ffmpeg.js": "^4.2.9003",
-    "@ffmpeg/ffmpeg": "^0.8.3"
+    "@ffmpeg/ffmpeg": "^0.11.6"
   },
   "scripts": {
     "test": "npm run build",

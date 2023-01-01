@@ -47,18 +47,12 @@ function mux(crid) {
                 case 0: return [4 /*yield*/, worker.load()];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, worker.write('/v.ivf', crid.video)];
+                    worker.FS('writeFile', '/v.ivf', crid.video);
+                    worker.FS('writeFile', '/a.adx', crid.audio);
+                    return [4 /*yield*/, worker.run('-i /v.ivf -i /a.adx -c:v copy /o.mp4')];
                 case 2:
                     _a.sent();
-                    return [4 /*yield*/, worker.write('/a.adx', crid.audio)];
-                case 3:
-                    _a.sent();
-                    return [4 /*yield*/, worker.run('-i /v.ivf -i /a.adx -c:v copy /o.mp4')];
-                case 4:
-                    _a.sent();
-                    return [4 /*yield*/, worker.read('/o.mp4')];
-                case 5:
-                    data = _a.sent();
+                    data = worker.FS('readFile', '/o.mp4');
                     return [2 /*return*/, data];
             }
         });

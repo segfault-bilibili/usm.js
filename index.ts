@@ -3,12 +3,12 @@ import { createFFmpeg } from "@ffmpeg/ffmpeg";
 let crid = new CRID();
 let worker = createFFmpeg({ log: true })
 
-async function mux(crid: CRID) {
+async function mux(crid: CRID): Promise<Uint8Array> {
     await worker.load()
-    await worker.write('/v.ivf', crid.video)
-    await worker.write('/a.adx', crid.audio)
+    worker.FS('writeFile','/v.ivf', crid.video)
+    worker.FS('writeFile','/a.adx', crid.audio)
     await worker.run('-i /v.ivf -i /a.adx -c:v copy /o.mp4')
-    const data = await worker.read('/o.mp4')
+    const data = worker.FS('readFile', '/o.mp4')
     return data;
 }
 
