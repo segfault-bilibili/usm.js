@@ -23,7 +23,7 @@ async function decode(usm: ArrayBuffer): Promise<Uint8Array> {
     tock("load ffmpeg");
 
     tick();
-    const demuxed = await crid.demuxAsync(usm);
+    const demuxed = crid.demux(usm);
     tock("demux");
 
     tick();

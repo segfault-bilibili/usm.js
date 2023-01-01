@@ -113,12 +113,10 @@ class CRID {
             this.strings.push(s);
         }
     }
-    parseTrunk(data: ArrayBuffer, async = false) {
+    parseTrunk(data: ArrayBuffer) {
         let ftell = 0;
         let v_trunks:Uint8Array[] = [];
         let a_trunks:Uint8Array[] = [];
-        let v_trunks_a:Promise<Uint8Array>[] = [];
-        let a_trunks_a:Promise<Uint8Array>[] = [];
         let v_size = 0;
         let a_size = 0;
         this.strings = [];
@@ -141,34 +139,19 @@ class CRID {
                     data.slice(ftell + off + 8, )
                     p = new Uint8Array(data, ftell + off + 8, len - off - pad);
                     v_size += p.byteLength;
-                    if (async) v_trunks_a.push(this.maskVideoAsync(p));
-                    else       v_trunks.push(this.maskVideo(p))
+                    v_trunks.push(this.maskVideo(p))
                     break;
                 case 0x41465340: // @SFA
                     if (type) break;
                     p = new Uint8Array(data, ftell + off + 8, len - off - pad);
                     a_size += p.byteLength;
-                    if (async) a_trunks_a.push(this.maskAudioAsync(p));
-                    else       a_trunks.push(this.maskAudio(p))
+                    a_trunks.push(this.maskAudio(p))
                     break;
                 default: // @CUE ...
             }
             ftell += len + 8;
         }
-        return { v_trunks, v_trunks_a, v_size, a_trunks, a_trunks_a, a_size }
-    }
-    async demuxAsync(data: ArrayBuffer) {
-        let result = this.parseTrunk(data, true)
-        this.video = new Uint8Array(result.v_size);
-        this.audio = new Uint8Array(result.a_size);
-        await Promise.all([
-            this.concatAsync(result.v_trunks_a, this.video),
-            this.concatAsync(result.a_trunks_a, this.audio)
-        ])
-        return {
-            video: this.video,
-            audio: this.audio
-        }
+        return { v_trunks, v_size, a_trunks, a_size }
     }
     demux(data: ArrayBuffer) {
         let result = this.parseTrunk(data)
@@ -190,20 +173,9 @@ class CRID {
         }
         return p;
     }
-    async maskVideoAsync(p:Uint8Array) { return this.maskVideo(p); }
     maskAudio(p:Uint8Array) {
         for (let j = 0x140; j < p.byteLength; j++) p[j] ^= this._am[j & 0x1f];
         return p;
-    }
-    async maskAudioAsync(p:Uint8Array) { return this.maskAudio(p); }
-    private async concatAsync(trunks: Promise<Uint8Array>[], dist: Uint8Array) {
-        let offset = 0;
-        for (let i of trunks) {
-            let buff = await i;
-            dist.set(buff, offset);
-            offset += buff.byteLength;
-        }
-        return dist;
     }
     private concat(trunks: Uint8Array[], dist: Uint8Array) {
         let offset = 0;
